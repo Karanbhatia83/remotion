@@ -1,0 +1,7 @@
+node_modules/
+out/
+# Source footage is not committed — drop your own clips in public/
+public/*.mp4
+public/*.mov
+public/*.mp3
+public/*.wav
