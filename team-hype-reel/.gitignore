@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+.env
+
+# Ignore the output video from Git but not videos you import into src/.
+out
+
+# Team footage stays local (the repo is public). Drop your clip in as public/team.mp4
+# and extract the roll-call still with:
+#   npx remotion ffmpeg -ss 4.8 -i public/team.mp4 -frames:v 1 -q:v 2 public/freeze.jpg
+public/team.mp4
+public/freeze.jpg
