@@ -1,0 +1,7 @@
+node_modules
+out
+.remotion
+
+# Source media is large; keep it out of git.
+public/*.mp4
+public/*.mov

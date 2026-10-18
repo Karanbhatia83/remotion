@@ -1,0 +1,26 @@
+{
+  "name": "antara-devi-reel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Instagram Reel composite: green-screen narrator over a temple background.",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "build": "remotion render DeviTempleReel out/devi-temple-reel.mp4",
+    "still": "remotion still DeviTempleReel out/still.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/effects": "4.0.536",
+    "@remotion/media": "4.0.536",
+    "mediabunny": "1.61.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  }
+}
