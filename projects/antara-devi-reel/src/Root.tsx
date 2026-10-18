@@ -43,9 +43,11 @@ const calculateMetadata: CalculateMetadataFunction<DeviTempleReelProps> = async 
 const END_CARD_DURATION_SECONDS = 3;
 
 const endCardProps: EndCardProps = {
-	eyebrow: 'Share this with',
-	headlineTop: 'the woman',
-	headlineBottom: 'you cherish',
+	// Withholding the reason is the hook: the viewer supplies the meaning, and
+	// "she'll know" implies something private between sender and recipient.
+	eyebrow: 'Send it to her',
+	headlineTop: "She'll know",
+	headlineBottom: 'why',
 	backgroundSrc: 'temple.jpg',
 	// A short fade reads as polish; set to 0 for a hard cut.
 	fadeInSeconds: 0.3,

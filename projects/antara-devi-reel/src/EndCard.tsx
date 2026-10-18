@@ -22,6 +22,34 @@ export type EndCardProps = {
 
 const CREAM = '#F6E7C8';
 
+// Inter Display ExtraBold uppercase renders at ~0.60 x fontSize per character
+// (calibrated: "YOU CHERISH", 11 chars at 132px, measured 866px of ink).
+// Size the headline off the longest line so copy can change without overflowing.
+const SIDE_PADDING = 90;
+const USABLE_WIDTH = 1080 - SIDE_PADDING * 2;
+// 0.60 is the measured average; 0.64 buys a safety margin so a wide glyph run
+// never pushes a line past the edge and triggers a wrap.
+const CHAR_WIDTH_RATIO = 0.64;
+const MAX_HEADLINE_SIZE = 150;
+const MIN_HEADLINE_SIZE = 76;
+
+const headlineFontSize = (lines: string[]): number => {
+	const longest = Math.max(...lines.map((l) => l.length), 1);
+	const fitted = USABLE_WIDTH / (longest * CHAR_WIDTH_RATIO);
+	return Math.max(MIN_HEADLINE_SIZE, Math.min(MAX_HEADLINE_SIZE, fitted));
+};
+
+// The eyebrow is tracked out wide, so letter-spacing dominates its width.
+const EYEBROW_MAX_SIZE = 50;
+const EYEBROW_TRACKING_RATIO = 0.26;
+
+const eyebrowFontSize = (text: string): number => {
+	const chars = Math.max(text.length, 1);
+	const fitted =
+		USABLE_WIDTH / (chars * (0.52 + EYEBROW_TRACKING_RATIO));
+	return Math.min(EYEBROW_MAX_SIZE, fitted);
+};
+
 export const EndCard: React.FC<EndCardProps> = ({
 	eyebrow,
 	headlineTop,
@@ -31,6 +59,8 @@ export const EndCard: React.FC<EndCardProps> = ({
 }) => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
+	const fontSize = headlineFontSize([headlineTop, headlineBottom]);
+	const eyebrowSize = eyebrowFontSize(eyebrow);
 
 	const opacity =
 		fadeInSeconds <= 0
@@ -73,14 +103,15 @@ export const EndCard: React.FC<EndCardProps> = ({
 					textAlign: 'center',
 					fontFamily: '"Inter Display", "Inter", sans-serif',
 					color: CREAM,
-					padding: '0 90px',
+					padding: `0 ${SIDE_PADDING}px`,
 				}}
 			>
 				<div
 					style={{
-						fontSize: 50,
+						fontSize: eyebrowSize,
 						fontWeight: 600,
-						letterSpacing: 13,
+						letterSpacing: eyebrowSize * EYEBROW_TRACKING_RATIO,
+						whiteSpace: 'nowrap',
 						textTransform: 'uppercase',
 						opacity: 0.82,
 						marginBottom: 54,
@@ -90,22 +121,24 @@ export const EndCard: React.FC<EndCardProps> = ({
 				</div>
 				<div
 					style={{
-						fontSize: 132,
+						fontSize,
 						fontWeight: 800,
 						lineHeight: 1.04,
 						letterSpacing: -1,
 						textTransform: 'uppercase',
+						whiteSpace: 'nowrap',
 					}}
 				>
 					{headlineTop}
 				</div>
 				<div
 					style={{
-						fontSize: 132,
+						fontSize,
 						fontWeight: 800,
 						lineHeight: 1.04,
 						letterSpacing: -1,
 						textTransform: 'uppercase',
+						whiteSpace: 'nowrap',
 					}}
 				>
 					{headlineBottom}
