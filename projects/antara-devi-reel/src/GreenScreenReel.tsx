@@ -4,7 +4,7 @@ import React from 'react';
 import {AbsoluteFill, CanvasImage, staticFile} from 'remotion';
 import {chromaKey} from './effects/chroma-key';
 
-export type DeviTempleReelProps = {
+export type GreenScreenReelProps = {
 	/** Green-screen plate, relative to `public/`. */
 	readonly narratorSrc: string;
 	/** Temple plate, relative to `public/`. */
@@ -29,7 +29,7 @@ export type DeviTempleReelProps = {
 	readonly narratorScale: number;
 };
 
-export const DeviTempleReel: React.FC<DeviTempleReelProps> = ({
+export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 	narratorSrc,
 	backgroundSrc,
 	keyer,
