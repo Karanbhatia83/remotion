@@ -1,6 +1,7 @@
 import React from 'react';
 import {Composition, staticFile, type CalculateMetadataFunction} from 'remotion';
 import {DeviTempleReel, type DeviTempleReelProps} from './DeviTempleReel';
+import {EndCard, type EndCardProps} from './EndCard';
 import {getVideoMetadata} from './get-video-metadata';
 
 const NARRATOR_SRC = 'narrator-green.mp4';
@@ -39,8 +40,20 @@ const calculateMetadata: CalculateMetadataFunction<DeviTempleReelProps> = async 
 	};
 };
 
+const END_CARD_DURATION_SECONDS = 3;
+
+const endCardProps: EndCardProps = {
+	eyebrow: 'Share this with',
+	headlineTop: 'the woman',
+	headlineBottom: 'you cherish',
+	backgroundSrc: 'temple.jpg',
+	// A short fade reads as polish; set to 0 for a hard cut.
+	fadeInSeconds: 0.3,
+};
+
 export const RemotionRoot: React.FC = () => {
 	return (
+		<>
 		<Composition
 			id="DeviTempleReel"
 			component={DeviTempleReel}
@@ -53,5 +66,15 @@ export const RemotionRoot: React.FC = () => {
 			defaultProps={defaultProps}
 			calculateMetadata={calculateMetadata}
 		/>
+		<Composition
+			id="EndCard"
+			component={EndCard}
+			durationInFrames={END_CARD_DURATION_SECONDS * 30}
+			fps={30}
+			width={1080}
+			height={1920}
+			defaultProps={endCardProps}
+		/>
+		</>
 	);
 };
