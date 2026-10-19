@@ -1,5 +1,6 @@
 import {Video} from '@remotion/media';
 import {colorKey} from '@remotion/effects/color-key';
+import {glow} from '@remotion/effects/glow';
 import React from 'react';
 import {AbsoluteFill, CanvasImage, staticFile} from 'remotion';
 import {chromaKey} from './effects/chroma-key';
@@ -29,6 +30,31 @@ export type GreenScreenReelProps = {
 	readonly subjectFilter: string;
 	/** Uniform scale of the narrator. 1 = fills the frame as shot. */
 	readonly narratorScale: number;
+	/**
+	 * Soft light placed *behind* the subject, centred on the head. Drawn between
+	 * background and subject so it reads as light in the room rather than a
+	 * shape laid over her. 0 disables it.
+	 */
+	readonly haloStrength: number;
+	readonly haloRadius: number;
+	readonly haloCenterX: number;
+	readonly haloCenterY: number;
+	readonly haloColor: string;
+	/**
+	 * Bloom on the subject. Only pixels above `glowThreshold` bloom, so the
+	 * light comes off her own highlights the way a diffusion filter behaves,
+	 * instead of brightening the whole figure. 0 disables it.
+	 */
+	readonly glowIntensity: number;
+	readonly glowRadius: number;
+	readonly glowThreshold: number;
+	readonly glowColor: string;
+	/**
+	 * Gentle darkening of the frame edges. Not decoration: it gives the halo
+	 * something to separate against on a bright background, and pulls the eye
+	 * to her. 0 disables it.
+	 */
+	readonly vignetteStrength: number;
 };
 
 export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
@@ -42,7 +68,39 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 	matteSoftness,
 	subjectFilter,
 	narratorScale,
+	haloStrength,
+	haloRadius,
+	haloCenterX,
+	haloCenterY,
+	haloColor,
+	glowIntensity,
+	glowRadius,
+	glowThreshold,
+	glowColor,
+	vignetteStrength,
 }) => {
+	const effects = [
+		keyer === 'chroma'
+			? chromaKey({
+					keyColor,
+					similarity,
+					smoothness,
+					spillSuppression,
+					matteSoftness,
+				})
+			: colorKey({keyColor, similarity, smoothness, spillSuppression}),
+	];
+
+	if (glowIntensity > 0) {
+		effects.push(
+			glow({
+				radius: glowRadius,
+				intensity: glowIntensity,
+				threshold: glowThreshold,
+				color: glowColor,
+			}),
+		);
+	}
 	return (
 		<AbsoluteFill name="Composite" style={{backgroundColor: '#000000'}}>
 			<CanvasImage
@@ -51,6 +109,23 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 				fit="cover"
 				style={{width: '100%', height: '100%'}}
 			/>
+			{haloStrength > 0 ? (
+				<AbsoluteFill name="Halo">
+					<div
+						style={{
+							position: 'absolute',
+							left: haloCenterX - haloRadius,
+							top: haloCenterY - haloRadius,
+							width: haloRadius * 2,
+							height: haloRadius * 2,
+							borderRadius: '50%',
+							background: `radial-gradient(circle, ${haloColor} 0%, transparent 72%)`,
+							opacity: haloStrength,
+							filter: 'blur(40px)',
+						}}
+					/>
+				</AbsoluteFill>
+			) : null}
 			<AbsoluteFill
 				name="Narrator"
 				style={{scale: narratorScale, transformOrigin: 'center center'}}
@@ -58,22 +133,7 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 				<Video
 					src={staticFile(narratorSrc)}
 					objectFit="cover"
-					effects={[
-						keyer === 'chroma'
-							? chromaKey({
-									keyColor,
-									similarity,
-									smoothness,
-									spillSuppression,
-									matteSoftness,
-								})
-							: colorKey({
-									keyColor,
-									similarity,
-									smoothness,
-									spillSuppression,
-								}),
-					]}
+					effects={effects}
 					style={{
 						width: '100%',
 						height: '100%',
@@ -81,6 +141,14 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 					}}
 				/>
 			</AbsoluteFill>
+			{vignetteStrength > 0 ? (
+				<AbsoluteFill
+					name="Vignette"
+					style={{
+						background: `radial-gradient(ellipse 72% 58% at 50% 42%, rgba(0,0,0,0) 45%, rgba(0,0,0,${vignetteStrength}) 100%)`,
+					}}
+				/>
+			) : null}
 		</AbsoluteFill>
 	);
 };

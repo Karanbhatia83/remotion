@@ -23,6 +23,16 @@ const templeProps: GreenScreenReelProps = {
 	subjectFilter:
 		'contrast(1.1) saturate(1.2) sepia(0.16) saturate(1.1) brightness(1.03)',
 	narratorScale: 1,
+	haloStrength: 0,
+	haloRadius: 520,
+	haloCenterX: 540,
+	haloCenterY: 620,
+	haloColor: 'rgba(255,243,217,1)',
+	glowIntensity: 0,
+	glowRadius: 28,
+	glowThreshold: 0.65,
+	glowColor: '#fff6e2',
+	vignetteStrength: 0,
 };
 
 // Duration and frame rate come from the plate itself, so swapping the file in
@@ -70,6 +80,18 @@ const libraryProps: GreenScreenReelProps = {
 	// because the stretch already scales chroma by ~1.56x.
 	subjectFilter: 'brightness(0.921) contrast(1.694) saturate(1.08)',
 	narratorScale: 1,
+	// Head centre measured across 10 frames spanning the film: x 448, y 620,
+	// moving by only ~30px, so a gradient this soft will not visibly drift.
+	haloStrength: 0.28,
+	haloRadius: 540,
+	haloCenterX: 448,
+	haloCenterY: 620,
+	haloColor: 'rgba(255,244,222,1)',
+	glowIntensity: 0.35,
+	glowRadius: 26,
+	glowThreshold: 0.62,
+	glowColor: '#fff4de',
+	vignetteStrength: 0.3,
 };
 
 const END_CARD_DURATION_SECONDS = 3;
