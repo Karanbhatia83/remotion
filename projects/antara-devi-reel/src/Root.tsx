@@ -74,7 +74,11 @@ const libraryProps: GreenScreenReelProps = {
 	similarity: 0.011,
 	smoothness: 0.006,
 	spillSuppression: 0.5,
-	matteSoftness: 1.5,
+	// 0, not 1.5. The 3x3 chroma average costs 2.45x render time (3.63 vs 1.48
+	// s/frame measured on an idle machine) and buys almost nothing here: the
+	// denoised plate already takes chattering boundary pixels from 51 to 23,
+	// and this only reaches 20.
+	matteSoftness: 0,
 	// This plate is badly flat: across 24 samples spanning the whole film the
 	// subject's luma never leaves 55-217 of 0-255, and SATAVG sits at 14.5.
 	// brightness/contrast here is an exact levels stretch of 0.235-0.850 onto
