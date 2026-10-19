@@ -108,6 +108,41 @@ ffmpeg -i green.mp4 -c:v libx264 -preset medium -crf 19 -profile:v high \
   -movflags +faststart public/narrator-green.mp4
 ```
 
+### Hair flicker and the denoised plate
+
+`LibraryReel` keys from `narrator-library-denoised.mp4`, not the raw transcode.
+Chroma is stored at half resolution in 4:2:0, so a 1-2px hair strand has no
+chroma of its own -- it borrows from the green backing beside it, and that
+borrowed value jitters frame to frame. Strands then land on the wrong side of
+the key threshold on some frames and disappear. That is the hair flicker.
+
+```bash
+ffmpeg -i src.mp4 -vf "hqdn3d=2:4:3:10" \
+  -c:v libx264 -preset medium -crf 18 -profile:v high -pix_fmt yuv420p \
+  -vsync cfr -r 30 -c:a aac -b:a 192k -ar 48000 \
+  -movflags +faststart public/narrator-library-denoised.mp4
+```
+
+The last parameter is chroma temporal strength -- the frame-to-frame jitter
+itself. Luma is left nearly alone, so facial detail survives (measured: 87.5% of
+gradient energy retained, visually indistinguishable).
+
+Measured on 12 consecutive frames at 0:50, counting boundary pixels whose
+brightness alternates direction frame to frame (motion is monotonic over short
+spans; key chatter oscillates):
+
+| plate | boundary px | chattering |
+|---|---|---|
+| raw | 5998 | 51 (0.85%) |
+| denoised | 5081 | 23 (0.45%) |
+| denoised + matteSoftness 1.5 | 5015 | 20 (0.40%) |
+
+Things that did **not** help, all measured rather than assumed: widening the
+feather made it worse (51 -> 89 chattering px, because a wider feather creates
+more semi-transparent pixels to wobble), tightening it also lost, and lossless
+PNG intermediates made no difference. The key parameters here are the ones that
+measured best; do not "soften" them to chase flicker.
+
 `public/*.mp4` is gitignored — 116 MB does not belong in the repo. Re-create it
 with the command above, or drop your own plate in and the composition re-reads
 its duration automatically.

@@ -18,6 +18,7 @@ const templeProps: GreenScreenReelProps = {
 	similarity: 0.042,
 	smoothness: 0.018,
 	spillSuppression: 0.5,
+	matteSoftness: 1.5,
 	// Flat plate -> contrast; grey skin -> saturation; cold key light -> sepia.
 	subjectFilter:
 		'contrast(1.1) saturate(1.2) sepia(0.16) saturate(1.1) brightness(1.03)',
@@ -41,7 +42,13 @@ const calculateMetadata: CalculateMetadataFunction<GreenScreenReelProps> = async
 };
 
 const libraryProps: GreenScreenReelProps = {
-	narratorSrc: 'narrator-library-green.mp4',
+	// Chroma-denoised plate (hqdn3d=2:4:3:10). Chroma lives at half resolution in
+	// 4:2:0, so a 1-2px hair strand's chroma jitters frame to frame and flips
+	// across the key threshold -- that is the hair flicker. Denoising chroma
+	// before the key cut chattering boundary pixels by 61% and shrank the
+	// semi-transparent boundary itself from 5998 to 5015 px, while retaining
+	// 87.5% of facial detail.
+	narratorSrc: 'narrator-library-denoised.mp4',
 	backgroundSrc: 'library.jpg',
 	keyer: 'chroma',
 	// Measured off this plate: an even flatter olive than the temple shoot.
@@ -49,9 +56,13 @@ const libraryProps: GreenScreenReelProps = {
 	// Backing sits at a chroma distance of 0.0019 and is exceptionally uniform;
 	// hair is 0.0207 and skin 0.0301, so 0.011 clears the backing with a wide
 	// margin on both sides.
+	// Hair measures 0.0207, backing 0.0019. Widening the feather to chase the
+	// flicker made it worse (more semi-transparent pixels to wobble: 51 -> 89
+	// chattering px), so these are back to the values that measured best.
 	similarity: 0.011,
 	smoothness: 0.006,
 	spillSuppression: 0.5,
+	matteSoftness: 1.5,
 	// This plate is badly flat: across 24 samples spanning the whole film the
 	// subject's luma never leaves 55-217 of 0-255, and SATAVG sits at 14.5.
 	// brightness/contrast here is an exact levels stretch of 0.235-0.850 onto

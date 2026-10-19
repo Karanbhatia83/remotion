@@ -26,6 +26,7 @@ const DEFAULT_KEY_COLOR = '#8ea371' as const;
 const DEFAULT_SIMILARITY = 0.042 as const;
 const DEFAULT_SMOOTHNESS = 0.018 as const;
 const DEFAULT_SPILL_SUPPRESSION = 0.5 as const;
+const DEFAULT_MATTE_SOFTNESS = 1.5 as const;
 
 export const chromaKeySchema = {
 	keyColor: {
@@ -60,6 +61,15 @@ export const chromaKeySchema = {
 		description: 'Spill suppression',
 		hiddenFromList: false,
 	},
+	matteSoftness: {
+		type: 'number',
+		min: 0,
+		max: 4,
+		step: 0.1,
+		default: DEFAULT_MATTE_SOFTNESS,
+		description: 'Matte softness',
+		hiddenFromList: false,
+	},
 } as const satisfies InteractivitySchema;
 
 export type ChromaKeyParams = {
@@ -71,6 +81,14 @@ export type ChromaKeyParams = {
 	readonly smoothness?: number;
 	/** How hard to pull the key colour out of the pixels that survive (0-1). Defaults to `0.5`. */
 	readonly spillSuppression?: number;
+	/**
+	 * Radius, in texels, over which chroma is averaged *before* the matte
+	 * decision. Chroma is stored at half resolution in 4:2:0, so a single hair
+	 * strand's chroma sample jitters between frames; averaging the neighbourhood
+	 * stops that jitter flipping pixels across the threshold. Colour output is
+	 * unaffected -- only the alpha decision is smoothed. Defaults to `1.5`.
+	 */
+	readonly matteSoftness?: number;
 };
 
 type ChromaKeyResolved = {
@@ -78,6 +96,7 @@ type ChromaKeyResolved = {
 	similarity: number;
 	smoothness: number;
 	spillSuppression: number;
+	matteSoftness: number;
 };
 
 type ChromaKeyState = {
@@ -92,6 +111,8 @@ type ChromaKeyState = {
 		readonly uSimilarity: WebGLUniformLocation | null;
 		readonly uSmoothness: WebGLUniformLocation | null;
 		readonly uSpillSuppression: WebGLUniformLocation | null;
+		readonly uTexel: WebGLUniformLocation | null;
+		readonly uMatteSoftness: WebGLUniformLocation | null;
 	};
 	readonly colorCtx: CanvasRenderingContext2D;
 	cachedColor: string;
@@ -103,6 +124,7 @@ const resolve = (p: ChromaKeyParams): ChromaKeyResolved => ({
 	similarity: p.similarity ?? DEFAULT_SIMILARITY,
 	smoothness: p.smoothness ?? DEFAULT_SMOOTHNESS,
 	spillSuppression: p.spillSuppression ?? DEFAULT_SPILL_SUPPRESSION,
+	matteSoftness: p.matteSoftness ?? DEFAULT_MATTE_SOFTNESS,
 });
 
 const assertUnitRange = (value: number, name: string, max: number): void => {
@@ -128,6 +150,7 @@ const validateChromaKeyParams = (params: ChromaKeyParams): void => {
 	assertUnitRange(r.similarity, 'similarity', 0.3);
 	assertUnitRange(r.smoothness, 'smoothness', 0.2);
 	assertUnitRange(r.spillSuppression, 'spillSuppression', 1);
+	assertUnitRange(r.matteSoftness, 'matteSoftness', 4);
 };
 
 const CHROMA_KEY_VS = /* glsl */ `#version 300 es
@@ -152,6 +175,8 @@ uniform vec3 uKeyColor;
 uniform float uSimilarity;
 uniform float uSmoothness;
 uniform float uSpillSuppression;
+uniform vec2 uTexel;
+uniform float uMatteSoftness;
 
 // BT.709 luma, then the Cb/Cr axes normalised the same way a YCbCr encoder does.
 vec2 rgbToChroma(vec3 c) {
@@ -175,6 +200,32 @@ color.b = mix(color.b, min(color.b, limit), amount);
 return color;
 }
 
+vec2 chromaAt(vec2 uv) {
+vec4 t = texture(uSource, uv);
+float a = max(t.a, 0.001);
+return rgbToChroma(t.rgb / a);
+}
+
+// 3x3 weighted average of chroma. Used ONLY to decide alpha -- the pixel's own
+// colour is still what gets drawn, so detail is preserved while the matte stops
+// chattering on thin structures like hair.
+vec2 stableChroma(vec2 uv, float radius) {
+if (radius <= 0.0) {
+return chromaAt(uv);
+}
+vec2 o = uTexel * radius;
+vec2 c = chromaAt(uv) * 4.0;
+c += chromaAt(uv + vec2( o.x, 0.0)) * 2.0;
+c += chromaAt(uv + vec2(-o.x, 0.0)) * 2.0;
+c += chromaAt(uv + vec2(0.0,  o.y)) * 2.0;
+c += chromaAt(uv + vec2(0.0, -o.y)) * 2.0;
+c += chromaAt(uv + vec2( o.x,  o.y));
+c += chromaAt(uv + vec2(-o.x,  o.y));
+c += chromaAt(uv + vec2( o.x, -o.y));
+c += chromaAt(uv + vec2(-o.x, -o.y));
+return c / 16.0;
+}
+
 void main() {
 vec4 texColor = texture(uSource, vUv);
 float alpha = texColor.a;
@@ -187,7 +238,7 @@ return;
 // The pipeline hands us premultiplied alpha; work in straight RGB.
 vec3 rgb = texColor.rgb / alpha;
 
-float chromaDistance = distance(rgbToChroma(rgb), rgbToChroma(uKeyColor));
+float chromaDistance = distance(stableChroma(vUv, uMatteSoftness), rgbToChroma(uKeyColor));
 
 // Below uSimilarity -> fully keyed. Above uSimilarity + uSmoothness -> fully
 // kept. The band between the two is the feathered edge.
@@ -325,6 +376,8 @@ const setupChromaKey = (target: HTMLCanvasElement): ChromaKeyState => {
 				program,
 				'uSpillSuppression',
 			),
+			uTexel: gl.getUniformLocation(program, 'uTexel'),
+			uMatteSoftness: gl.getUniformLocation(program, 'uMatteSoftness'),
 		},
 		colorCtx,
 		cachedColor: '',
@@ -359,7 +412,7 @@ export const chromaKey = createEffect<ChromaKeyParams, ChromaKeyState>({
 	backend: 'webgl2',
 	calculateKey: (params) => {
 		const r = resolve(params);
-		return `chroma-key-${r.keyColor}-${r.similarity}-${r.smoothness}-${r.spillSuppression}`;
+		return `chroma-key-${r.keyColor}-${r.similarity}-${r.smoothness}-${r.spillSuppression}-${r.matteSoftness}`;
 	},
 	setup: (target) => setupChromaKey(target),
 	apply: ({source, width, height, params, state, flipSourceY}) => {
@@ -392,6 +445,9 @@ export const chromaKey = createEffect<ChromaKeyParams, ChromaKeyState>({
 		if (uniforms.uSmoothness) gl.uniform1f(uniforms.uSmoothness, r.smoothness);
 		if (uniforms.uSpillSuppression)
 			gl.uniform1f(uniforms.uSpillSuppression, r.spillSuppression);
+		if (uniforms.uTexel) gl.uniform2f(uniforms.uTexel, 1 / width, 1 / height);
+		if (uniforms.uMatteSoftness)
+			gl.uniform1f(uniforms.uMatteSoftness, r.matteSoftness);
 
 		gl.bindVertexArray(vao);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

@@ -23,6 +23,8 @@ export type GreenScreenReelProps = {
 	readonly smoothness: number;
 	/** How hard to pull the key colour out of the pixels that survive. */
 	readonly spillSuppression: number;
+	/** Radius in texels over which chroma is averaged before deciding alpha. */
+	readonly matteSoftness: number;
 	/** Grade applied to the keyed subject so it sits in the lamplight. */
 	readonly subjectFilter: string;
 	/** Uniform scale of the narrator. 1 = fills the frame as shot. */
@@ -37,6 +39,7 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 	similarity,
 	smoothness,
 	spillSuppression,
+	matteSoftness,
 	subjectFilter,
 	narratorScale,
 }) => {
@@ -62,6 +65,7 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 									similarity,
 									smoothness,
 									spillSuppression,
+									matteSoftness,
 								})
 							: colorKey({
 									keyColor,
