@@ -152,6 +152,38 @@ pre-resampled with lanczos so the browser is not doing a 1.89x bilinear upscale
 every frame; `fit="cover"` is then a no-op. It is a soft, defocused plate so it
 carries the enlargement, but a higher-resolution original would look better.
 
+## Aura (LibraryReel)
+
+Three parts, tuned to brighten her face without looking applied:
+
+| part | where | why there |
+|---|---|---|
+| halo | baked into `library-halo.jpg` | sits behind her, so baking is identical to drawing it live and costs nothing per frame |
+| vignette | live layer, 0.30 | must darken her edges too, not only the background |
+| face lift | `subjectFilter` brightness term | free; see below |
+
+`glow()` from `@remotion/effects` is deliberately **not** used. Two reasons, both
+measured:
+
+- At threshold 0.62 it did nothing at all. Her skin sits at ~44% luminance, so
+  nothing cleared the threshold: the image changed by 0.049 of 255 while costing
+  ~3.1s per frame. At threshold 0.40 it works well (face luma +21.5, and local
+  contrast *rises*), but 3.1s/frame is hours across 4292 frames on software GL.
+- `brightness(1.019)` on top of the existing levels stretch reaches the same
+  place for free: face luma 134.2 against the shader's 133.9, local contrast
+  2.27 against the ungraded 2.24. Note it must be the **brightness** term that
+  changes. Lowering `contrast` to brighten instead gives face 126 at local
+  contrast 2.01, undoing the levels stretch this grade exists to apply.
+
+The vignette is not decoration. Without it the halo cannot read at any strength
+on this plate: the ring around her head measured 118.7 against frame corners at
+118.0 — identical. At 0.30 the corners drop 22% and the ring reaches 1.30x them.
+
+Regenerating the baked plate (halo centre x448 y620, measured across 10 frames):
+the gradient is a circle radial-gradient in a 1080px box, farthest-corner radius
+763.7px, stops at 12% and 70%, colour rgb(255,244,222) at 0.28 opacity,
+composited over `library.jpg`.
+
 ## Content
 
 No captions, no text, no lower thirds, no entrance or exit animation. The

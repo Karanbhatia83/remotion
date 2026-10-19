@@ -59,7 +59,9 @@ const libraryProps: GreenScreenReelProps = {
 	// semi-transparent boundary itself from 5998 to 5015 px, while retaining
 	// 87.5% of facial detail.
 	narratorSrc: 'narrator-library-denoised.mp4',
-	backgroundSrc: 'library.jpg',
+	// Halo is baked into this plate. It sits behind her, so baking is exactly
+	// equivalent to drawing it live and costs nothing per frame.
+	backgroundSrc: 'library-halo.jpg',
 	keyer: 'chroma',
 	// Measured off this plate: an even flatter olive than the temple shoot.
 	keyColor: '#858c72',
@@ -78,18 +80,25 @@ const libraryProps: GreenScreenReelProps = {
 	// brightness/contrast here is an exact levels stretch of 0.235-0.850 onto
 	// 0.02-0.98 -- not a taste adjustment. Saturation then only needs a nudge,
 	// because the stretch already scales chroma by ~1.56x.
-	subjectFilter: 'brightness(0.921) contrast(1.694) saturate(1.08)',
+	// The brightness term lifts her face to where the glow() shader reached
+	// (face luma 134.2 against the shader's 133.9) while leaving the contrast
+	// term of the levels stretch intact, so local contrast holds at 2.27 --
+	// above the ungraded 2.24 rather than below it. Lowering contrast to
+	// brighten instead reached only 126 with local contrast 2.01, which is the
+	// flatness this grade exists to remove. glow() itself is not used: it costs
+	// roughly 3.1s/frame on software GL here, i.e. hours across 4292 frames.
+	subjectFilter: 'brightness(1.019) contrast(1.694) saturate(1.10)',
 	narratorScale: 1,
 	// Head centre measured across 10 frames spanning the film: x 448, y 620,
 	// moving by only ~30px, so a gradient this soft will not visibly drift.
-	haloStrength: 0.28,
+	haloStrength: 0,
 	haloRadius: 540,
 	haloCenterX: 448,
 	haloCenterY: 620,
 	haloColor: 'rgba(255,244,222,1)',
-	glowIntensity: 0.35,
-	glowRadius: 26,
-	glowThreshold: 0.62,
+	glowIntensity: 0,
+	glowRadius: 18,
+	glowThreshold: 0.4,
 	glowColor: '#fff4de',
 	vignetteStrength: 0.3,
 };

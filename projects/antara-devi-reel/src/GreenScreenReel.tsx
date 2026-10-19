@@ -119,9 +119,8 @@ export const GreenScreenReel: React.FC<GreenScreenReelProps> = ({
 							width: haloRadius * 2,
 							height: haloRadius * 2,
 							borderRadius: '50%',
-							background: `radial-gradient(circle, ${haloColor} 0%, transparent 72%)`,
+							background: `radial-gradient(circle, ${haloColor} 0%, ${haloColor} 12%, transparent 70%)`,
 							opacity: haloStrength,
-							filter: 'blur(40px)',
 						}}
 					/>
 				</AbsoluteFill>
