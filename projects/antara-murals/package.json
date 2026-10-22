@@ -1,0 +1,14 @@
+{
+  "name": "antara-murals",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Seamless-loop animated mural backdrops for the Antara LED wall.",
+  "scripts": { "studio": "remotion studio" },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/media": "4.0.536",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536"
+  }
+}
