@@ -3,6 +3,7 @@ import {AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig} from 're
 import {cyc, frac, hump, lerp, rng, smooth} from './loop';
 import geom from './data/mandala-geom.json';
 import gems from './data/mandala-gems.json';
+import {useFonts} from './fonts';
 
 // Mural 5 — golden mandala under the opening Om.
 // The plate is split into concentric annuli with radial masks; each annulus
@@ -34,6 +35,7 @@ const ringMask = (r0: number, r1: number) =>
     : `radial-gradient(circle at ${CX}px ${CY}px, rgba(0,0,0,0) ${r0 - 2}px, rgba(0,0,0,1) ${r0 + 2}px, rgba(0,0,0,1) ${r1 - 2}px, rgba(0,0,0,0) ${r1 + 2}px)`;
 
 export const Mandala: React.FC = () => {
+  useFonts();
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const t = frame / durationInFrames;
@@ -103,6 +105,22 @@ export const Mandala: React.FC = () => {
             background: `radial-gradient(circle at ${CX}px ${CY}px, rgba(0,0,0,0) ${R - 90}px, rgba(255,226,160,0.9) ${R}px, rgba(0,0,0,0) ${R + 90}px)`,
           }}
         />
+
+        {/* ---------- ॐ at the centre; its glow swells each time the pulse is born ---------- */}
+        {(() => {
+          const g = 0.35 + 0.65 * Math.pow(1 - ph, 2);
+          const om: React.CSSProperties = {
+            position: 'absolute', left: CX, top: CY, translate: '-50% -54%', fontFamily: "'Rozha One', serif", fontSize: 236, lineHeight: 1, whiteSpace: 'nowrap',
+          };
+          return (
+            <>
+              <div style={{...om, color: `rgba(255,205,110,${0.55 * g})`, filter: 'blur(22px)', mixBlendMode: 'screen'}}>ॐ</div>
+              <div style={{...om, color: 'rgba(0,0,0,0.6)', translate: '-50% calc(-54% + 5px)', filter: 'blur(4px)'}}>ॐ</div>
+              <div style={{...om, backgroundImage: 'linear-gradient(160deg, #fff0c2 0%, #f1cf78 30%, #c8922a 65%, #8a5d14 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent'}}>ॐ</div>
+              <div style={{...om, color: `rgba(255,245,215,${0.25 * g})`, translate: '-50% calc(-54% - 2px)', mixBlendMode: 'screen'}}>ॐ</div>
+            </>
+          );
+        })()}
 
         {/* ---------- gems glint as the pulse passes ---------- */}
         {(gems as Array<{x: number; y: number; k: string; rad: number}>).map((g, i) => {

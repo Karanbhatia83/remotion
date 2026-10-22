@@ -79,6 +79,10 @@ export const RamNaam: React.FC = () => {
             <Img src={staticFile('plates/ramnaam-tile.png')} style={{position: 'absolute', left: 0, top: 0, width: W, height: TILE_H}} />
             <Img src={staticFile('plates/ramnaam-tile.png')} style={{position: 'absolute', left: 0, top: TILE_H, width: W, height: TILE_H}} />
             <Img src={staticFile('plates/ramnaam-tile.png')} style={{position: 'absolute', left: 0, top: -TILE_H, width: W, height: TILE_H}} />
+            {/* the devotee's handwriting: thousands of राम, inked into the paper and scrolling with it */}
+            {[-TILE_H, 0, TILE_H].map((top) => (
+              <Img key={top} src={staticFile('plates/ram-tile.png')} style={{position: 'absolute', left: 0, top, width: W, height: TILE_H, mixBlendMode: 'multiply'}} />
+            ))}
           </AbsoluteFill>
         </AbsoluteFill>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {breath, cyc, frac, hump, lerp, rng, smooth} from './loop';
+import {useFonts} from './fonts';
 
 // Mural 3 — Nathdwara Pichwai cloth under "Radhey Radhey" / "Hare Krishna".
 // Plate is static (with a periodic cloth sway). Fish, two lotuses and the
@@ -41,6 +42,7 @@ const LOTUS = [
 ];
 
 export const Pichwai: React.FC = () => {
+  useFonts();
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const t = frame / durationInFrames;
@@ -175,6 +177,36 @@ export const Pichwai: React.FC = () => {
             />
           );
         })}
+
+        {/* ---------- lettering: one large gold राधे in the centre, small words along the borders ---------- */}
+        {(() => {
+          const gold = `linear-gradient(100deg, #b9842a ${(glintX - 0.6) * 100}%, #e9c468 ${(glintX - 0.35) * 100}%, #fff2c0 ${(glintX - 0.28) * 100}%, #e9c468 ${(glintX - 0.21) * 100}%, #b9842a ${(glintX + 0.05) * 100}%)`;
+          const big: React.CSSProperties = {
+            position: 'absolute', left: 0, right: 0, top: H * 0.5, translate: '0 -50%', textAlign: 'center',
+            fontFamily: "'Rozha One', serif", fontSize: 300, lineHeight: 1.25, letterSpacing: '0.04em', whiteSpace: 'nowrap',
+          };
+          const small: React.CSSProperties = {
+            position: 'absolute', fontFamily: "'Tiro Devanagari Hindi', serif", fontSize: 24, lineHeight: 1, color: '#ead49a', opacity: 0.92, whiteSpace: 'nowrap', translate: '-50% -50%',
+            textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+          };
+          const words = ['राधे राधे', 'हरे कृष्ण'];
+          // side borders: words run along the border, turned like a frame inscription,
+          // set just inboard of the gold so the 3% push-in never crops them
+          // only the band between the kadamba and the cows (y 0.33–0.46) is free of painted elements
+          const cols = [{x: 0.036, rot: -90}, {x: 0.964, rot: 90}].flatMap(({x, rot}) =>
+            [0.36, 0.44].map((y, i) => ({x, y, rot, w: words[(i + (rot > 0 ? 1 : 0)) % 2]})));
+          const rows = [0.035, 0.965].flatMap((y) => Array.from({length: 11}, (_, i) => ({x: 0.10 + i * 0.08, y, rot: 0, w: words[i % 2]})));
+          return (
+            <>
+              <div style={{...big, color: 'rgba(20,10,0,0.55)', translate: '3px calc(-50% + 5px)', filter: 'blur(3px)'}}>राधे</div>
+              <div style={{...big, backgroundImage: gold, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent'}}>राधे</div>
+              <div style={{...big, color: 'rgba(255,240,200,0.18)', translate: '-1px calc(-50% - 1px)', mixBlendMode: 'screen'}}>राधे</div>
+              {[...cols, ...rows].map((p, i) => (
+                <div key={i} style={{...small, left: p.x * W, top: p.y * H, rotate: `${p.rot}deg`}}>{p.w}</div>
+              ))}
+            </>
+          );
+        })()}
 
         {/* ---------- fireflies on the indigo ground ---------- */}
         {FIREFLIES.map((f, i) => {

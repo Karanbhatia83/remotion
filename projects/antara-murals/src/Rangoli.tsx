@@ -3,6 +3,7 @@ import {AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig} from 're
 import {cyc, flicker, frac, hump, lerp, rng, smooth} from './loop';
 import flames from './data/rangoli-flames.json';
 import geom from './data/rangoli-geom.json';
+import {useFonts} from './fonts';
 
 // Mural 6 — top-down rangoli ringed with diyas.
 // Diya positions were detected from the plate. Flicker, the clockwise light
@@ -45,7 +46,8 @@ const Petal: React.FC<{x: number; y: number; rot: number; scale: number; opacity
   />
 );
 
-export const Rangoli: React.FC = () => {
+export const Rangoli: React.FC<{lettering?: boolean}> = ({lettering = false}) => {
+  useFonts();
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const t = frame / durationInFrames;
@@ -124,6 +126,19 @@ export const Rangoli: React.FC = () => {
         {SLIDERS.map((p, i) => (
           <Petal key={`sl${i}`} x={p.x + 48 * cyc(t, 1, p.p)} y={p.y + 6 * cyc(t, 2, p.p)} rot={p.rot + 14 * cyc(t, 1, p.p)} scale={1} opacity={1} />
         ))}
+
+        {/* ---------- optional: a small line on the plain centre ---------- */}
+        {lettering && (
+          <div
+            style={{
+              position: 'absolute', left: CX, top: CY, translate: '-50% -55%', fontFamily: "'Tiro Devanagari Hindi', serif", fontSize: 42, lineHeight: 1.2,
+              color: '#fff4dc', whiteSpace: 'nowrap', textShadow: '0 2px 6px rgba(60,20,0,0.75), 0 0 18px rgba(255,180,90,0.45)',
+              opacity: 0.92 + 0.08 * (0.5 + 0.5 * flicker(t, 3)),
+            }}
+          >
+            वन्दे मातरम्
+          </div>
+        )}
 
         {/* ---------- warm lamplight grade and edges ---------- */}
         <AbsoluteFill style={{background: 'radial-gradient(ellipse 80% 95% at 50% 50%, rgba(0,0,0,0) 45%, rgba(12,6,2,0.45) 80%, rgba(8,4,1,0.8) 100%)'}} />

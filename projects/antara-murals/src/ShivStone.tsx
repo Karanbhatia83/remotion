@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {breath, cyc, frac, hump, lerp, rng} from './loop';
 import frost from './data/shiv-frost.json';
+import {useFonts} from './fonts';
 
 // Mural 2 — Himalayan granite under "Om Namah Shivay".
 // Plate is static. Moonlight, saffron rim, the travelling inner glow, snow,
@@ -34,6 +35,7 @@ const makeAsh = (n: number, seed: number): Ash[] => {
 const ASH = makeAsh(90, 2211);
 
 export const ShivStone: React.FC = () => {
+  useFonts();
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const t = frame / durationInFrames;
@@ -140,6 +142,28 @@ export const ShivStone: React.FC = () => {
             background: 'linear-gradient(265deg, rgba(255,190,110,1) 0%, rgba(255,150,70,0.5) 25%, rgba(0,0,0,0) 55%)',
           }}
         />
+
+        {/* ---------- the carved line: ॐ नमः शिवाय, cut into the stone across the centre ---------- */}
+        {(() => {
+          const near = Math.exp(-Math.pow((glowX - 0.5) / 0.32, 2)) * glowFade;
+          const base: React.CSSProperties = {
+            position: 'absolute', left: 0, right: 0, top: H / 2, translate: '0 -50%', textAlign: 'center',
+            fontFamily: "'Rozha One', serif", fontSize: 150, lineHeight: 1.3, letterSpacing: '0.08em', whiteSpace: 'nowrap',
+          };
+          const text = 'ॐ नमः शिवाय';
+          return (
+            <>
+              {/* upper groove wall in shadow */}
+              <div style={{...base, color: 'rgba(0,0,0,0.75)', translate: '-2px calc(-50% - 4px)', filter: 'blur(2px)'}}>{text}</div>
+              {/* the recess itself, darker stone */}
+              <div style={{...base, color: 'rgba(10,14,24,0.78)', mixBlendMode: 'multiply'}}>{text}</div>
+              <div style={{...base, color: 'rgba(40,52,78,0.55)'}}>{text}</div>
+              {/* lower groove wall catches the moonlight, and flares as the inner glow passes */}
+              <div style={{...base, color: `rgba(225,232,250,${0.28 + 0.6 * near})`, translate: '2px calc(-50% + 4px)', filter: 'blur(0.6px)', mixBlendMode: 'screen'}}>{text}</div>
+              <div style={{...base, color: `rgba(255,236,200,${0.55 * near})`, translate: '1px calc(-50% + 2px)', filter: 'blur(6px)', mixBlendMode: 'screen'}}>{text}</div>
+            </>
+          );
+        })()}
 
         {/* ---------- ash rising from the bottom ---------- */}
         {ASH.map((a, i) => {
