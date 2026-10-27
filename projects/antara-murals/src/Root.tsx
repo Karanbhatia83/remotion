@@ -20,6 +20,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="RangoliLettered" component={Rangoli} width={1920} height={1080} fps={24} durationInFrames={240} defaultProps={{lettering: true}} />
     <Composition id="ThankYouReel" component={Reel} width={1080} height={1920} fps={30} durationInFrames={TOTAL_FRAMES} defaultProps={{music: true}} />
     <Composition id="ThankYouReelNoMusic" component={Reel} width={1080} height={1920} fps={30} durationInFrames={TOTAL_FRAMES} defaultProps={{music: false}} />
+    <Composition id="ThankYouReelCover" component={Reel} width={1080} height={1920} fps={30} durationInFrames={TOTAL_FRAMES} defaultProps={{music: false, cover: true}} />
     <Composition id="RamTile" component={RamTile} width={1920} height={1080} fps={24} durationInFrames={1} />
   </>
 );

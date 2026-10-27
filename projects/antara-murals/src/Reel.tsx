@@ -16,7 +16,7 @@ const gold: React.CSSProperties = {backgroundImage: GOLD, WebkitBackgroundClip: 
 type Cue = {start: number; end: number; text: string};
 const CUES = captions as Cue[];
 
-export const Reel: React.FC<{music: boolean}> = ({music}) => {
+export const Reel: React.FC<{music: boolean; cover?: boolean}> = ({music, cover = false}) => {
   useFonts();
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
@@ -49,16 +49,16 @@ export const Reel: React.FC<{music: boolean}> = ({music}) => {
       <AbsoluteFill style={{boxShadow: 'inset 0 0 260px 110px rgba(13,7,8,0.72)'}} />
 
       {/* Hook, first 3 seconds */}
-      <Hook frame={frame} />
+      <Hook frame={cover ? 40 : frame} />
 
       {/* City callouts while she names the two shows */}
-      <Callouts t={t} />
+      {!cover && <Callouts t={t} />}
 
       {/* Captions */}
-      {CUES.map((c, i) => <Caption key={i} cue={c} t={t} fps={fps} />)}
+      {!cover && CUES.map((c, i) => <Caption key={i} cue={c} t={t} fps={fps} />)}
 
       {/* End card */}
-      <EndCard opacity={cardIn} frame={frame - mainEnd} />
+      {!cover && <EndCard opacity={cardIn} frame={frame - mainEnd} />}
 
       <Audio src={staticFile(music ? 'reel/mix_music.wav' : 'reel/mix_voice_only.wav')} />
     </AbsoluteFill>
