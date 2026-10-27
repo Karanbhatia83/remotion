@@ -34,7 +34,7 @@ export const Reel: React.FC<{music: boolean}> = ({music}) => {
     <AbsoluteFill style={{backgroundColor: '#0D0708', overflow: 'hidden'}}>
       {/* Layer 1: background painting, blurred, with a slow push */}
       <AbsoluteFill style={{scale: String(bgScale), transformOrigin: '50% 42%'}}>
-        <Img src={staticFile('reel/bg_shiva.png')} style={{width: 1080, height: 1920, objectFit: 'cover', filter: 'saturate(0.92) brightness(0.86)'}} />
+        <Img src={staticFile('reel/bg_shiva.png')} style={{width: 1080, height: 1920, objectFit: 'cover', filter: 'saturate(0.9) brightness(0.84)'}} />
       </AbsoluteFill>
       {/* darken the zone behind the head so the face carries the frame */}
       <AbsoluteFill style={{background: 'radial-gradient(60% 38% at 50% 34%, rgba(10,4,2,0.42) 0%, rgba(10,4,2,0.18) 55%, rgba(10,4,2,0) 100%)'}} />
@@ -45,7 +45,7 @@ export const Reel: React.FC<{music: boolean}> = ({music}) => {
       </AbsoluteFill>
 
       {/* Layer 3: warm key-light wash from the top right + vignette, tying both layers together */}
-      <AbsoluteFill style={{background: 'radial-gradient(55% 40% at 78% 8%, rgba(255,190,110,0.22) 0%, rgba(255,190,110,0) 70%)', mixBlendMode: 'screen'}} />
+      <AbsoluteFill style={{background: 'radial-gradient(55% 40% at 78% 8%, rgba(255,214,160,0.10) 0%, rgba(255,214,160,0) 70%)', mixBlendMode: 'screen'}} />
       <AbsoluteFill style={{boxShadow: 'inset 0 0 260px 110px rgba(13,7,8,0.72)'}} />
 
       {/* Hook, first 3 seconds */}
