@@ -8,6 +8,7 @@ import {Mandala} from './Mandala';
 import {Rangoli} from './Rangoli';
 import {RamTile} from './RamTile';
 import {Reel, TOTAL_FRAMES} from './Reel';
+import {BrahmaMuhurta, BM_FPS, BM_FRAMES} from './BrahmaMuhurta';
 import {KashiEndCard, TOTAL_FRAMES as KASHI_FRAMES, FPS as KASHI_FPS} from './KashiEndCard';
 
 export const RemotionRoot: React.FC = () => (
@@ -23,6 +24,9 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="ThankYouReelNoMusic" component={Reel} width={1080} height={1920} fps={30} durationInFrames={TOTAL_FRAMES} defaultProps={{music: false}} />
     <Composition id="ThankYouReelCover" component={Reel} width={1080} height={1920} fps={30} durationInFrames={TOTAL_FRAMES} defaultProps={{music: false, cover: true}} />
     <Composition id="KashiEndCard" component={KashiEndCard} width={1080} height={1920} fps={KASHI_FPS} durationInFrames={KASHI_FRAMES} />
+    <Composition id="BrahmaMuhurtaA" component={BrahmaMuhurta} width={1080} height={1920} fps={BM_FPS} durationInFrames={BM_FRAMES} defaultProps={{hook: 'A' as const, audio: 'brahma/score.wav'}} />
+    <Composition id="BrahmaMuhurtaB" component={BrahmaMuhurta} width={1080} height={1920} fps={BM_FPS} durationInFrames={BM_FRAMES} defaultProps={{hook: 'B' as const, audio: 'brahma/score.wav'}} />
+    <Composition id="BrahmaMuhurtaC" component={BrahmaMuhurta} width={1080} height={1920} fps={BM_FPS} durationInFrames={BM_FRAMES} defaultProps={{hook: 'C' as const, audio: 'brahma/score.wav'}} />
     <Composition id="RamTile" component={RamTile} width={1920} height={1080} fps={24} durationInFrames={1} />
   </>
 );
